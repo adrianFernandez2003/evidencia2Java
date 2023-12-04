@@ -1,5 +1,6 @@
 package metodos;
 
+import entidades.Doctor;
 import entidades.Pacientes;
 
 import java.io.*;
@@ -46,6 +47,11 @@ public class CrudPacientes {
     //Añadir Paciente
     public void agregarPaciente(Pacientes p){
         ArrayList<Pacientes> listaLectura = leerArchivo();
+
+        if (existePacienteConId(p.getId())) {
+            System.out.println("ya existe un paciente con ese id");
+            return;
+        }
         listaLectura.add(p);
         escribirArchivo(listaLectura);
     }
@@ -61,7 +67,19 @@ public class CrudPacientes {
     }
 
     //modificar
+    public void modificarPaciente(Pacientes pacienteModificado) {
+        ArrayList<Pacientes> listaLectura = leerArchivo();
 
+        for (int i = 0; i < listaLectura.size(); i++) {
+            Pacientes pacienteActual = listaLectura.get(i);
+            if (pacienteActual.getId().equals(pacienteModificado.getId())) {
+                listaLectura.set(i, pacienteModificado);
+                escribirArchivo(listaLectura);
+                return;
+            }
+        }
+        System.out.println("No se encontró ningún paciente con el ID: " + pacienteModificado.getId());
+    }
     //borrar paciente
     public void borrarPacientePorId(String id) {
         ArrayList<Pacientes> listaLectura = leerArchivo();
@@ -74,7 +92,7 @@ public class CrudPacientes {
                 break;
             }
         }
-        // Si se encontró al paciente, eliminarlo de la lista
+
         if (pacienteAEliminar != null) {
             listaLectura.remove(pacienteAEliminar);
             escribirArchivo(listaLectura);
@@ -91,10 +109,24 @@ public class CrudPacientes {
 
     //verificar estado de campos
     public boolean camposValidos(Pacientes p) {
-        // Verificar que los campos obligatorios no estén vacíos
         return p.getId() != null && !p.getId().isEmpty() &&
                 p.getNombre() != null && !p.getNombre().isEmpty() &&
                 p.getApellidoP() != null && !p.getApellidoP().isEmpty() &&
-                p.getApellidoM() != null && !p.getApellidoM().isEmpty();
+                p.getApellidoM() != null && !p.getApellidoM().isEmpty() &&
+                p.getCorreo() != null && !p.getCorreo().isEmpty() &&
+                p.getNumeroTel() != null && !p.getNumeroTel().isEmpty() &&
+                p.getGenero() != null && !p.getGenero().isEmpty() && !p.getGenero().equals("Seleccione el sexo");
+    }
+    //verificar si existen doctores
+    public boolean existePacienteConId(String id) {
+        ArrayList<Pacientes> listaDoctores = leerArchivo();
+
+        for (Pacientes p : listaDoctores) {
+            if (p.getId().equals(id)) {
+                return true; // El doctor con el ID dado ya existe
+            }
+        }
+
+        return false; // No hay doctor con el ID dado
     }
 }

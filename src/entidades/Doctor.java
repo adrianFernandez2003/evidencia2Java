@@ -1,18 +1,18 @@
 package entidades;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class Doctor {
-    private int id;
-    private String nombre, apellidoP, apellidoM, numeroTel, correo, genero, licenciaMedica, especialidad, idConsultorio,
+public class Doctor implements Serializable {
+    private String id, nombre, apellidoP, apellidoM, numeroTel, correo, genero, licenciaMedica, especialidad, idConsultorio,
     salario, areaTrabajo;
     private Date fechaNac;
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
