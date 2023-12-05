@@ -772,7 +772,7 @@ public class VistaGeneral extends JFrame{
         VistaGeneral v = new VistaGeneral();
         v.setContentPane(v.general);
         v.setLocationRelativeTo(null);
-        v.setSize(800,500);
+        v.setSize(850,600);
         v.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         v.setVisible(true);
     }

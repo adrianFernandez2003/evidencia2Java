@@ -82,7 +82,7 @@ public class vistaEmpleado extends JFrame{
         vistaEmpleado e = new vistaEmpleado();
         e.setContentPane(e.miPanel);
         e.setLocationRelativeTo(null);
-        e.setSize(800,500);
+        e.setSize(850,600);
         e.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         e.setVisible(true);
     }
