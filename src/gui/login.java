@@ -25,7 +25,10 @@ public class login extends JFrame{
                     String[] tipoUsuario = {"admin"};
                     VistaGeneral.main(tipoUsuario);
                 }else if(txtUsuario.getText().equals("empleado") && contraseña.equals("hola")) {
+                    dispose();
                     JOptionPane.showMessageDialog(miPanel, "Bienvenido a la plataforma empleado");
+                    String[] tipoUsuario = {"empleado"};
+                    vistaEmpleado.main(tipoUsuario);
                 }else {
                     JOptionPane.showMessageDialog(miPanel, "Usuario o contraseña incorrectos", "login", JOptionPane.ERROR_MESSAGE);
                 }

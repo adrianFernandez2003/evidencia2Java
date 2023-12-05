@@ -1,7 +1,6 @@
 package metodos;
 
 import entidades.Doctor;
-import entidades.Pacientes;
 
 import javax.print.Doc;
 import java.io.*;
@@ -77,7 +76,7 @@ public class CrudDoctores {
                 return;
             }
         }
-        System.out.println("No se encontró ningún paciente con el ID: " + DoctorModificado.getId());
+        System.out.println("No se encontró ningún doctor con el ID: " + DoctorModificado.getId());
     }
     //eliminar doctor
     public void borrarDoctorPorId(String id) {
@@ -111,7 +110,8 @@ public class CrudDoctores {
                 d.getCorreo() != null && !d.getCorreo().isEmpty() &&
                 d.getNumeroTel() != null && !d.getNumeroTel().isEmpty() &&
                 d.getGenero() != null && !d.getGenero().isEmpty() && !d.getGenero().equals("Seleccione el sexo") &&
-                d.getEspecialidad() != null && !d.getEspecialidad().isEmpty() && !d.getEspecialidad().equals("Seleccione la especialidad");
+                d.getEspecialidad() != null && !d.getEspecialidad().isEmpty() && !d.getEspecialidad().equals("Seleccione la especialidad") &&
+                d.getFechaNac() != null;
     }
     //verificar si existen doctores
     public boolean existeDoctorConId(String id) {
@@ -119,11 +119,11 @@ public class CrudDoctores {
 
         for (Doctor doctor : listaDoctores) {
             if (doctor.getId().equals(id)) {
-                return true; // El doctor con el ID dado ya existe
+                return true;
             }
         }
 
-        return false; // No hay doctor con el ID dado
+        return false;
     }
 }
 

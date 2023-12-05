@@ -1,14 +1,20 @@
 package gui;
 
+import entidades.Cita;
 import entidades.Doctor;
 import entidades.Pacientes;
+import metodos.CrudCitas;
 import metodos.CrudDoctores;
 import metodos.CrudPacientes;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 public class VistaGeneral extends JFrame{
     private JPanel miPanel;
@@ -22,7 +28,7 @@ public class VistaGeneral extends JFrame{
     private JTextField txtNombre;
     private JLabel lblFechaNac;
     private JComboBox cmbDia;
-    private JComboBox cmbAño;
+    private JComboBox cmbAnio;
     private JComboBox cmbMes;
     private JButton btnBuscar;
     private JButton btnBorrar;
@@ -60,8 +66,60 @@ public class VistaGeneral extends JFrame{
     private JLabel lblDoctores;
     private JComboBox cmbEspecialidad;
     private JLabel lblEspecialidad;
+    private JComboBox cmbDiaDoctor;
+    private JComboBox cmbMesDoctor;
+    private JComboBox cmbAnioDoctor;
+    private JLabel lblFechaNacDoctor;
+    private JButton btnAgendarCita;
+    private JButton btnCancelarCita;
+    private JTextArea txtaNotas;
+    private JLabel lblNotas;
+    private JTextField txtIdCita;
+    private JLabel lblIdCita;
+    private JComboBox cmbHoraCita;
+    private JComboBox cmbDiaCita;
+    private JComboBox cmbMesCita;
+    private JComboBox cmbAnioCita;
+    private JButton btnBuscarCita;
+    private JButton btnModificarCita;
+    private JButton btnCerrarSesion;
+    private JButton btnCerrarSesion2;
+    private JButton btnCerrarSesion3;
+    private JList<String>  liPacientes;
+    private JList<String>  liDoctores;
+    private JList<String>  liCitas;
+    private DefaultListModel<String> pacientesListModel;
+    private DefaultListModel<String> doctoresListModel;
+    private DefaultListModel<String> citasListModel;
+
+
+    //general validar fecha
+    public boolean validarFecha(String fecha){
+        try{
+            SimpleDateFormat formatoFecha =
+                    new SimpleDateFormat("dd/MM/yyyy");
+            formatoFecha.setLenient(false);
+            Date fechaNacimiento = formatoFecha.parse(fecha);
+            System.out.println(fechaNacimiento);
+        }catch(Exception e){
+            return false;
+        }
+        return true;
+    }
 
     public VistaGeneral() {
+
+        pacientesListModel = new DefaultListModel<>();
+        liPacientes.setModel(pacientesListModel);
+        doctoresListModel = new DefaultListModel<>();
+        liDoctores.setModel(doctoresListModel);
+        citasListModel = new DefaultListModel<>();
+        liCitas.setModel(citasListModel);
+
+        cargarPacientes();
+        cargarDoctores();
+        cargarCitas();
+
         //pacientes
         btnCrear.addActionListener(new ActionListener() {
             @Override
@@ -76,10 +134,24 @@ public class VistaGeneral extends JFrame{
 
                 Object selectedItem = cmbSexo.getSelectedItem();
                 p.setGenero(cmbSexo.getSelectedItem().toString());
+                String fechaNacimiento = cmbDia.getSelectedItem().toString() + "/" + cmbMes.getSelectedItem().toString() + "/" + cmbAnio.getSelectedItem().toString();
+                boolean resultado = validarFecha(fechaNacimiento);
+                if(resultado){
+                    SimpleDateFormat formatoFecha = new SimpleDateFormat("dd/MM/yyyy");
+                    formatoFecha.setLenient(false);
+                    Date fechaNacPacientes = null;
+                    try {
+                        fechaNacPacientes = formatoFecha.parse(fechaNacimiento);
+                    } catch (ParseException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                    p.setFechaNac(fechaNacPacientes);
+                }else{
+                    cmbDia.requestFocus();
+                    cmbMes.requestFocus();
+                    cmbAnio.requestFocus();
+                }
 
-
-
-                //crear paciente
                 try {
                     CrudPacientes crud = new CrudPacientes();
 
@@ -90,6 +162,7 @@ public class VistaGeneral extends JFrame{
                             return;
                         }
                         crud.agregarPaciente(p);
+                        cargarPacientes();
                         actualizarListaPacientes();
                         JOptionPane.showMessageDialog(VistaGeneral.this, "Paciente creado exitosamente");
 
@@ -106,12 +179,11 @@ public class VistaGeneral extends JFrame{
             @Override
             public void actionPerformed(ActionEvent e) {
 
-
                 CrudPacientes crud = new CrudPacientes();
                 String id = txtId.getText();
                 Pacientes p = crud.buscarPacientePorId(id);
                 if (p == null) {
-                    int respuesta = JOptionPane.showConfirmDialog(miPanel, "No fue posible encontrar al paciente con id " + id + "\n¿Desea dar de alta?" ,"Alumno",JOptionPane.YES_NO_OPTION);
+                    int respuesta = JOptionPane.showConfirmDialog(miPanel, "No fue posible encontrar al paciente con id " + id + "\n¿Desea dar de alta?" ,"Paciente",JOptionPane.YES_NO_OPTION);
                     if (respuesta == 0){
                         btnCrear.setEnabled(true);
                         txtNombre.requestFocus();
@@ -123,6 +195,13 @@ public class VistaGeneral extends JFrame{
                         txtTelefono.setText(crud.limpiarCampos());
                         String[] generos = {"Seleccione el sexo", "Masculino", "Femenino"};
                         cmbSexo.setModel(new DefaultComboBoxModel<>(generos));
+                        String[] dia = {"Dia", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15",
+                                "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"};
+                        cmbDia.setModel(new DefaultComboBoxModel<>(dia));
+                        String[] mes = {"Mes", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"};
+                        cmbMes.setModel(new DefaultComboBoxModel<>(mes));
+                        String[] anio = {"Año", "2023", "2022", "2021", "2020", "2019", "2018", "2017", "2016", "2015", "2014", "2013", "2012"};
+                        cmbAnio.setModel(new DefaultComboBoxModel<>(anio));
                     }
                 }else{
                     txtNombre.setText(p.getNombre());
@@ -134,6 +213,22 @@ public class VistaGeneral extends JFrame{
                     String[] generos = {"Seleccione el sexo", "Masculino", "Femenino"};
                     cmbSexo.setModel(new DefaultComboBoxModel<>(generos));
                     cmbSexo.setSelectedItem(p.getGenero());
+                    String[] dia = {"Dia", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15",
+                            "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"};
+                    cmbDia.setModel(new DefaultComboBoxModel<>(dia));
+                    String[] mes = {"Mes", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"};
+                    cmbMes.setModel(new DefaultComboBoxModel<>(mes));
+                    String[] anio = {"Año", "2023", "2022", "2021", "2020", "2019", "2018", "2017", "2016", "2015", "2014", "2013", "2012"};
+                    cmbAnio.setModel(new DefaultComboBoxModel<>(anio));
+
+                    if (p.getFechaNac() != null) {
+                        Calendar cal = Calendar.getInstance();
+                        cal.setTime(p.getFechaNac());
+
+                        cmbDia.setSelectedItem(String.format("%02d", cal.get(Calendar.DAY_OF_MONTH)));
+                        cmbMes.setSelectedItem(String.format("%02d", cal.get(Calendar.MONTH) + 1));
+                        cmbAnio.setSelectedItem(String.valueOf(cal.get(Calendar.YEAR)));
+                    }
                 }
             }
         });
@@ -150,6 +245,14 @@ public class VistaGeneral extends JFrame{
                 txtTelefono.setText(crud.limpiarCampos());
                 String[] generos = {"Seleccione el sexo", "Masculino", "Femenino"};
                 cmbSexo.setModel(new DefaultComboBoxModel<>(generos));
+                String[] dia = {"Dia", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15",
+                        "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"};
+                cmbDia.setModel(new DefaultComboBoxModel<>(dia));
+                String[] mes = {"Mes", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"};
+                cmbMes.setModel(new DefaultComboBoxModel<>(mes));
+                String[] anio = {"Año", "2023", "2022", "2021", "2020", "2019", "2018", "2017", "2016", "2015", "2014", "2013", "2012"};
+                cmbAnio.setModel(new DefaultComboBoxModel<>(anio));
+                cargarPacientes();
                 actualizarListaPacientes();
                 JOptionPane.showMessageDialog(VistaGeneral.this, "Paciente borrado con exito");
             }
@@ -167,12 +270,27 @@ public class VistaGeneral extends JFrame{
 
                 Object selectedItem = cmbSexo.getSelectedItem();
                 p.setGenero(cmbSexo.getSelectedItem().toString());
+                String fecha = cmbDia.getSelectedItem().toString() + "/" + cmbMes.getSelectedItem().toString() + "/" + cmbAnio.getSelectedItem().toString();
+                boolean resultado = validarFecha(fecha);
 
+                if (resultado) {
+                    SimpleDateFormat formatoFecha = new SimpleDateFormat("dd/MM/yyyy");
+                    try {
+                        p.setFechaNac(formatoFecha.parse(fecha));
+                    } catch (ParseException ex) {
+                        ex.printStackTrace();
+                    }
+                } else {
+                    cmbDia.requestFocus();
+                    cmbMes.requestFocus();
+                    cmbAnio.requestFocus();
+                }
                 try {
                     CrudPacientes crud = new CrudPacientes();
 
                     if (crud.camposValidos(p)) {
                         crud.modificarPaciente(p);
+                        cargarPacientes();
                         actualizarListaPacientes();
                         JOptionPane.showMessageDialog(VistaGeneral.this, "Paciente modificado exitosamente");
                     } else {
@@ -201,6 +319,23 @@ public class VistaGeneral extends JFrame{
                 Object selectedItem2 = cmbEspecialidad.getSelectedItem();
                 d.setEspecialidad(cmbEspecialidad.getSelectedItem().toString());
 
+                String fechaNacimiento = cmbDiaDoctor.getSelectedItem().toString() + "/" + cmbMesDoctor.getSelectedItem().toString() + "/" + cmbAnioDoctor.getSelectedItem().toString();
+                boolean resultado = validarFecha(fechaNacimiento);
+                if(resultado){
+                    SimpleDateFormat formatoFecha = new SimpleDateFormat("dd/MM/yyyy");
+                    formatoFecha.setLenient(false);
+                    Date fechaNacDoctores = null;
+                    try {
+                        fechaNacDoctores = formatoFecha.parse(fechaNacimiento);
+                    } catch (ParseException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                    d.setFechaNac(fechaNacDoctores);
+                }else{
+                    cmbDia.requestFocus();
+                    cmbMes.requestFocus();
+                    cmbAnio.requestFocus();
+                }
 
                 //crear doctor
                 try {
@@ -213,6 +348,7 @@ public class VistaGeneral extends JFrame{
                             return;
                         }
                         crud.agregardoctor(d);
+                        cargarDoctores();
                         actualizarListaDoctores();
                         JOptionPane.showMessageDialog(VistaGeneral.this, "Paciente creado exitosamente");
 
@@ -247,6 +383,13 @@ public class VistaGeneral extends JFrame{
                                 "Neumología", "Neurología", "Radiología", "Anestesiología", "rehabilitación"};
                         cmbSexoDoctores.setModel(new DefaultComboBoxModel<>(generos));
                         cmbEspecialidad.setModel(new DefaultComboBoxModel<>(especialidades));
+                        String[] dia = {"Dia", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15",
+                                "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"};
+                        cmbDiaDoctor.setModel(new DefaultComboBoxModel<>(dia));
+                        String[] mes = {"Mes", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"};
+                        cmbMesDoctor.setModel(new DefaultComboBoxModel<>(mes));
+                        String[] anio = {"Año", "2023", "2022", "2021", "2020", "2019", "2018", "2017", "2016", "2015", "2014", "2013", "2012"};
+                        cmbAnioDoctor.setModel(new DefaultComboBoxModel<>(anio));
                     }
                 }else{
                     txtNombreDoctores.setText(d.getNombre());
@@ -256,13 +399,29 @@ public class VistaGeneral extends JFrame{
                     txtTelefonoDoctores.setText(d.getNumeroTel());
 
                     String[] generos = {"Seleccione el sexo", "Masculino", "Femenino"};
+                    cmbSexoDoctores.setModel(new DefaultComboBoxModel<>(generos));
+                    cmbSexoDoctores.setSelectedItem(d.getGenero());
                     String[] especialidades = {"Seleccione la especialidad", "Pediatria", "Cirugía",
                             "Psiquiatría", "Cardiología", "Dermatología", "Oftalmología", "Otorrinolaringología",
                             "Neumología", "Neurología", "Radiología", "Anestesiología", "rehabilitación"};
-                    cmbSexoDoctores.setModel(new DefaultComboBoxModel<>(generos));
-                    cmbSexoDoctores.setSelectedItem(d.getGenero());
                     cmbEspecialidad.setModel(new DefaultComboBoxModel<>(especialidades));
                     cmbEspecialidad.setSelectedItem(d.getEspecialidad());
+                    String[] dia = {"Dia", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15",
+                            "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"};
+                    cmbDiaDoctor.setModel(new DefaultComboBoxModel<>(dia));
+                    String[] mes = {"Mes", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"};
+                    cmbMesDoctor.setModel(new DefaultComboBoxModel<>(mes));
+                    String[] anio = {"Año", "2023", "2022", "2021", "2020", "2019", "2018", "2017", "2016", "2015", "2014", "2013", "2012"};
+                    cmbAnioDoctor.setModel(new DefaultComboBoxModel<>(anio));
+
+                    if (d.getFechaNac() != null) {
+                        Calendar cal = Calendar.getInstance();
+                        cal.setTime(d.getFechaNac());
+
+                        cmbDiaDoctor.setSelectedItem(String.format("%02d", cal.get(Calendar.DAY_OF_MONTH)));
+                        cmbMesDoctor.setSelectedItem(String.format("%02d", cal.get(Calendar.MONTH) + 1));
+                        cmbAnioDoctor.setSelectedItem(String.valueOf(cal.get(Calendar.YEAR)));
+                    }
 
 
                 }
@@ -286,10 +445,16 @@ public class VistaGeneral extends JFrame{
                         "Neumología", "Neurología", "Radiología", "Anestesiología", "rehabilitación"};
                 cmbSexoDoctores.setModel(new DefaultComboBoxModel<>(generos));
                 cmbEspecialidad.setModel(new DefaultComboBoxModel<>(especialidades));
+                String[] dia = {"Dia", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15",
+                        "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"};
+                cmbDiaDoctor.setModel(new DefaultComboBoxModel<>(dia));
+                String[] mes = {"Mes", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"};
+                cmbMesDoctor.setModel(new DefaultComboBoxModel<>(mes));
+                String[] anio = {"Año", "2023", "2022", "2021", "2020", "2019", "2018", "2017", "2016", "2015", "2014", "2013", "2012"};
+                cmbAnioDoctor.setModel(new DefaultComboBoxModel<>(anio));
+                cargarDoctores();
                 actualizarListaDoctores();
                 JOptionPane.showMessageDialog(VistaGeneral.this, "Paciente borrado con exito");
-
-                cmbSexo.setModel(new DefaultComboBoxModel<>(generos));
 
             }
         });
@@ -311,12 +476,27 @@ public class VistaGeneral extends JFrame{
                 d.setGenero(cmbSexoDoctores.getSelectedItem().toString());
                 Object selectedItem2 = cmbEspecialidad.getSelectedItem();
                 d.setEspecialidad(cmbEspecialidad.getSelectedItem().toString());
+                String fecha = cmbDiaDoctor.getSelectedItem().toString() + "/" + cmbMesDoctor.getSelectedItem().toString() + "/" + cmbAnioDoctor.getSelectedItem().toString();
+                boolean resultado = validarFecha(fecha);
 
+                if (resultado) {
+                    SimpleDateFormat formatoFecha = new SimpleDateFormat("dd/MM/yyyy");
+                    try {
+                        d.setFechaNac(formatoFecha.parse(fecha));
+                    } catch (ParseException ex) {
+                        ex.printStackTrace();
+                    }
+                } else {
+                    cmbDia.requestFocus();
+                    cmbMes.requestFocus();
+                    cmbAnio.requestFocus();
+                }
                 try {
                     CrudDoctores crud = new CrudDoctores();
 
                     if (crud.camposValidos(d)) {
                         crud.modificarDoctor(d);
+                        cargarDoctores();
                         actualizarListaDoctores();
                         JOptionPane.showMessageDialog(VistaGeneral.this, "Doctor modificado exitosamente");
                     } else {
@@ -325,6 +505,191 @@ public class VistaGeneral extends JFrame{
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(VistaGeneral.this, "Error al modificar el Doctor: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
+            }
+        });
+        //Citas
+
+        //Crear cita
+        btnAgendarCita.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Cita c = new Cita();
+                CrudCitas crud = new CrudCitas();
+                c.setIdCita((txtIdCita.getText()));
+                c.setNotas(txtaNotas.getText());
+                Object selectedItem = cmbListaPacientes.getSelectedItem();
+                c.setNombrePaciente(cmbListaPacientes.getSelectedItem().toString());
+                Object selectedItem2 = cmbListaDoctores.getSelectedItem();
+                c.setNombreDoctor(cmbListaDoctores.getSelectedItem().toString());
+
+                String fechaCita = cmbDiaCita.getSelectedItem().toString() + "/" + cmbMesCita.getSelectedItem().toString() +
+                        "/" + cmbAnioCita.getSelectedItem().toString() + " at " + cmbHoraCita.getSelectedItem().toString();
+                boolean resultado = crud.validarFechaCita(fechaCita);
+                if(resultado){
+                    SimpleDateFormat formatoFecha = new SimpleDateFormat("dd/MM/yyyy 'at' HH");
+                    formatoFecha.setLenient(false);
+                    Date fechaCitas = null;
+                    try {
+                        fechaCitas = formatoFecha.parse(fechaCita);
+                    } catch (ParseException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                    c.setFechaAgenda(fechaCitas);
+                }else{
+                    cmbDiaCita.requestFocus();
+                    cmbMesCita.requestFocus();
+                    cmbAnioCita.requestFocus();
+                    cmbHoraCita.requestFocus();
+                }
+                try {
+
+
+                    //verificar
+                    if(crud.camposValidos(c)) {
+                        if (crud.existeCitaConId(c.getIdCita())) {
+                            JOptionPane.showMessageDialog(VistaGeneral.this, "Una cita con ese id ya ha sido creada");
+                            return;
+                        }
+                        crud.agendarCita(c);
+                        cargarCitas();
+                        JOptionPane.showMessageDialog(VistaGeneral.this, "Cita creada exitosamente");
+
+                    }else {
+                        JOptionPane.showMessageDialog(VistaGeneral.this, "Campos obligatorios no pueden estar vacíos", "Advertencia", JOptionPane.WARNING_MESSAGE);
+                    }
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(VistaGeneral.this, "Error al crear la cita: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+        btnCancelarCita.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                CrudCitas crud = new CrudCitas();
+                String id = txtIdCita.getText();
+                crud.borrarCitaPorId(id);
+                txtIdCita.setText(crud.limpiarCampos());
+                txtaNotas.setText(crud.limpiarCampos());
+                String[] dia = {"Dia", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15",
+                        "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"};
+                cmbDiaCita.setModel(new DefaultComboBoxModel<>(dia));
+                String[] mes = {"Mes", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"};
+                cmbMesCita.setModel(new DefaultComboBoxModel<>(mes));
+                String[] anio = {"Año", "2023", "2024", "2025", "2026", "2027", "2028"};
+                cmbAnioCita.setModel(new DefaultComboBoxModel<>(anio));
+                String[] hora = {"Hora", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24"};
+                cmbHoraCita.setModel(new DefaultComboBoxModel<>(hora));
+                cargarCitas();
+                JOptionPane.showMessageDialog(VistaGeneral.this, "Cita cancelada con exito");
+            }
+        });
+        btnBuscarCita.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                CrudCitas crud = new CrudCitas();
+                String id = txtIdCita.getText();
+                Cita c = crud.buscarCitaPorId(id);
+                if (c == null) {
+                    int respuesta = JOptionPane.showConfirmDialog(miPanel, "No fue posible encontrar al paciente con id " + id + "\n¿Desea crear cita?" ,"Cita",JOptionPane.YES_NO_OPTION);
+                    if (respuesta == 0){
+
+                    }else if(respuesta == 1){
+                        txtaNotas.setText(crud.limpiarCampos());
+                        String[] dia = {"Dia", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15",
+                                "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"};
+                        cmbDiaCita.setModel(new DefaultComboBoxModel<>(dia));
+                        String[] mes = {"Mes", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"};
+                        cmbMesCita.setModel(new DefaultComboBoxModel<>(mes));
+                        String[] anio = {"Año", "2023", "2022", "2021", "2020", "2019", "2018", "2017", "2016", "2015", "2014", "2013", "2012"};
+                        cmbAnioCita.setModel(new DefaultComboBoxModel<>(anio));
+                        String[] hora = {"Hora", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24"};
+                        cmbHoraCita.setModel(new DefaultComboBoxModel<>(hora));
+                    }
+                }else{
+                    txtIdCita.setText(c.getIdCita());
+                    txtaNotas.setText(c.getNotas());
+
+                    String[] dia = {"Dia", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15",
+                            "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"};
+                    cmbDiaCita.setModel(new DefaultComboBoxModel<>(dia));
+                    String[] mes = {"Mes", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"};
+                    cmbMesCita.setModel(new DefaultComboBoxModel<>(mes));
+                    String[] anio = {"Año", "2023", "2022", "2021", "2020", "2019", "2018", "2017", "2016", "2015", "2014", "2013", "2012"};
+                    cmbAnioCita.setModel(new DefaultComboBoxModel<>(anio));
+                    String[] hora = {"Hora", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24"};
+                    cmbHoraCita.setModel(new DefaultComboBoxModel<>(hora));
+                    cmbListaPacientes.setSelectedItem(c.getNombrePaciente());
+                    cmbListaDoctores.setSelectedItem(c.getNombreDoctor());
+                    if (c.getFechaAgenda() != null) {
+                        Calendar cal = Calendar.getInstance();
+                        cal.setTime(c.getFechaAgenda());
+
+                        cmbDiaCita.setSelectedItem(String.format("%02d", cal.get(Calendar.DAY_OF_MONTH)));
+                        cmbMesCita.setSelectedItem(String.format("%02d", cal.get(Calendar.MONTH) + 1));
+                        cmbAnioCita.setSelectedItem(String.valueOf(cal.get(Calendar.YEAR)));
+                        cmbHoraCita.setSelectedItem(String.valueOf(cal.get(Calendar.HOUR_OF_DAY)));
+                    }
+                }
+            }
+        });
+        btnModificarCita.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Cita c = new Cita();
+                CrudCitas crud = new CrudCitas();
+                c.setIdCita(txtIdCita.getText());
+                c.setNotas(txtaNotas.getText());
+
+                Object selectedItem = cmbListaDoctores.getSelectedItem();
+                c.setNombreDoctor(cmbListaDoctores.getSelectedItem().toString());
+                Object selectedItem2 = cmbEspecialidad.getSelectedItem();
+                c.setNombrePaciente(cmbListaPacientes.getSelectedItem().toString());
+                String fecha = cmbDiaCita.getSelectedItem().toString() + "/" + cmbMesCita.getSelectedItem().toString() +
+                        "/" + cmbAnioCita.getSelectedItem().toString() + " at " + cmbHoraCita.getSelectedItem().toString();
+                boolean resultado = crud.validarFechaCita(fecha);
+
+                if (resultado) {
+                    SimpleDateFormat formatoFecha = new SimpleDateFormat("dd/MM/yyyy 'at' HH");
+                    try {
+                        c.setFechaAgenda(formatoFecha.parse(fecha));
+                    } catch (ParseException ex) {
+                        ex.printStackTrace();
+                    }
+                } else {
+                    cmbDia.requestFocus();
+                    cmbMes.requestFocus();
+                    cmbAnio.requestFocus();
+                }
+                try {
+
+                    if (crud.camposValidos(c)) {
+                        crud.modificarCita(c);
+                        cargarCitas();
+                        JOptionPane.showMessageDialog(VistaGeneral.this, "Cita modificada exitosamente");
+                    } else {
+                        JOptionPane.showMessageDialog(VistaGeneral.this, "Los campos no pueden estar vacios", "Advertencia", JOptionPane.WARNING_MESSAGE);
+                    }
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(VistaGeneral.this, "Error al modificar el Cita: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+        btnCerrarSesion.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cerrarSesion();
+            }
+        });
+        btnCerrarSesion2.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cerrarSesion();
+            }
+        });
+        btnCerrarSesion3.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cerrarSesion();
             }
         });
     }
@@ -357,11 +722,57 @@ public class VistaGeneral extends JFrame{
         }
     }
 
+    private void cerrarSesion() {
+        int respuesta = JOptionPane.showConfirmDialog(miPanel, "\n¿Desea cerrar sesion?" ,"Cerrar sesion",JOptionPane.YES_NO_OPTION);
+        if(respuesta == 0) {
+            dispose();
+            JOptionPane.showMessageDialog(miPanel, "Sesion cerrada");
+            String[] tipoUsuario = {"admin"};
+            login.main(tipoUsuario);
+        }else {
+            System.out.println("cancelando");
+        }
+
+    }
+    // ciclar pacientes en lista
+    private void cargarPacientes() {
+        CrudPacientes crud = new CrudPacientes();
+        ArrayList<Pacientes> pacientes = crud.leerArchivo();
+
+        pacientesListModel.clear();
+
+        for (Pacientes p : pacientes) {
+            pacientesListModel.addElement(p.getId() + ": " + p.getNombre() + " " + p.getApellidoP() + " " + p.getApellidoM());
+        }
+    }
+    private void cargarDoctores() {
+        CrudDoctores crud = new CrudDoctores();
+        ArrayList<Doctor> doctores = crud.leerArchivo();
+
+        doctoresListModel.clear();
+
+        for (Doctor d : doctores) {
+            doctoresListModel.addElement(d.getId() + ": " + d.getNombre() + " " + d.getApellidoP() + " " + d.getApellidoM());
+        }
+    }
+    private void cargarCitas() {
+        CrudCitas crud = new CrudCitas();
+        ArrayList<Cita> citas = crud.leerArchivo();
+
+        citasListModel.clear();
+
+        for (Cita c : citas) {
+            citasListModel.addElement(c.getIdCita() + ": paciente - " + c.getNombrePaciente() + " | doctor - "
+                    + c.getNombreDoctor() + " | " + c.getFechaAgenda());
+        }
+    }
+
+
     public static void main(String[] args) {
         VistaGeneral v = new VistaGeneral();
         v.setContentPane(v.general);
         v.setLocationRelativeTo(null);
-        v.setSize(800,300);
+        v.setSize(800,500);
         v.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         v.setVisible(true);
     }

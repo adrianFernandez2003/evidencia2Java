@@ -115,7 +115,8 @@ public class CrudPacientes {
                 p.getApellidoM() != null && !p.getApellidoM().isEmpty() &&
                 p.getCorreo() != null && !p.getCorreo().isEmpty() &&
                 p.getNumeroTel() != null && !p.getNumeroTel().isEmpty() &&
-                p.getGenero() != null && !p.getGenero().isEmpty() && !p.getGenero().equals("Seleccione el sexo");
+                p.getGenero() != null && !p.getGenero().isEmpty() && !p.getGenero().equals("Seleccione el sexo") &&
+                p.getFechaNac() != null;
     }
     //verificar si existen doctores
     public boolean existePacienteConId(String id) {
@@ -129,4 +130,5 @@ public class CrudPacientes {
 
         return false; // No hay doctor con el ID dado
     }
+
 }
