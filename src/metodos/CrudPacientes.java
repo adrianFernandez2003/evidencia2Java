@@ -130,5 +130,4 @@ public class CrudPacientes {
 
         return false; // No hay doctor con el ID dado
     }
-
 }

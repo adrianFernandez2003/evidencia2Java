@@ -116,9 +116,7 @@ public class VistaGeneral extends JFrame{
         citasListModel = new DefaultListModel<>();
         liCitas.setModel(citasListModel);
 
-        cargarPacientes();
-        cargarDoctores();
-        cargarCitas();
+
 
         //pacientes
         btnCrear.addActionListener(new ActionListener() {
@@ -162,7 +160,7 @@ public class VistaGeneral extends JFrame{
                             return;
                         }
                         crud.agregarPaciente(p);
-                        cargarPacientes();
+
                         actualizarListaPacientes();
                         JOptionPane.showMessageDialog(VistaGeneral.this, "Paciente creado exitosamente");
 
@@ -252,7 +250,7 @@ public class VistaGeneral extends JFrame{
                 cmbMes.setModel(new DefaultComboBoxModel<>(mes));
                 String[] anio = {"Año", "2023", "2022", "2021", "2020", "2019", "2018", "2017", "2016", "2015", "2014", "2013", "2012"};
                 cmbAnio.setModel(new DefaultComboBoxModel<>(anio));
-                cargarPacientes();
+
                 actualizarListaPacientes();
                 JOptionPane.showMessageDialog(VistaGeneral.this, "Paciente borrado con exito");
             }
@@ -290,7 +288,7 @@ public class VistaGeneral extends JFrame{
 
                     if (crud.camposValidos(p)) {
                         crud.modificarPaciente(p);
-                        cargarPacientes();
+
                         actualizarListaPacientes();
                         JOptionPane.showMessageDialog(VistaGeneral.this, "Paciente modificado exitosamente");
                     } else {
@@ -348,7 +346,7 @@ public class VistaGeneral extends JFrame{
                             return;
                         }
                         crud.agregardoctor(d);
-                        cargarDoctores();
+
                         actualizarListaDoctores();
                         JOptionPane.showMessageDialog(VistaGeneral.this, "Paciente creado exitosamente");
 
@@ -452,13 +450,14 @@ public class VistaGeneral extends JFrame{
                 cmbMesDoctor.setModel(new DefaultComboBoxModel<>(mes));
                 String[] anio = {"Año", "2023", "2022", "2021", "2020", "2019", "2018", "2017", "2016", "2015", "2014", "2013", "2012"};
                 cmbAnioDoctor.setModel(new DefaultComboBoxModel<>(anio));
-                cargarDoctores();
+
                 actualizarListaDoctores();
                 JOptionPane.showMessageDialog(VistaGeneral.this, "Paciente borrado con exito");
 
             }
         });
         //citas
+        actualizarListaCitas();
         actualizarListaPacientes();
         actualizarListaDoctores();
         btnModificarDoctores.addActionListener(new ActionListener() {
@@ -496,7 +495,7 @@ public class VistaGeneral extends JFrame{
 
                     if (crud.camposValidos(d)) {
                         crud.modificarDoctor(d);
-                        cargarDoctores();
+
                         actualizarListaDoctores();
                         JOptionPane.showMessageDialog(VistaGeneral.this, "Doctor modificado exitosamente");
                     } else {
@@ -551,7 +550,7 @@ public class VistaGeneral extends JFrame{
                             return;
                         }
                         crud.agendarCita(c);
-                        cargarCitas();
+                        actualizarListaCitas();
                         JOptionPane.showMessageDialog(VistaGeneral.this, "Cita creada exitosamente");
 
                     }else {
@@ -579,7 +578,7 @@ public class VistaGeneral extends JFrame{
                 cmbAnioCita.setModel(new DefaultComboBoxModel<>(anio));
                 String[] hora = {"Hora", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24"};
                 cmbHoraCita.setModel(new DefaultComboBoxModel<>(hora));
-                cargarCitas();
+                actualizarListaCitas();
                 JOptionPane.showMessageDialog(VistaGeneral.this, "Cita cancelada con exito");
             }
         });
@@ -664,7 +663,7 @@ public class VistaGeneral extends JFrame{
 
                     if (crud.camposValidos(c)) {
                         crud.modificarCita(c);
-                        cargarCitas();
+                        actualizarListaCitas();
                         JOptionPane.showMessageDialog(VistaGeneral.this, "Cita modificada exitosamente");
                     } else {
                         JOptionPane.showMessageDialog(VistaGeneral.this, "Los campos no pueden estar vacios", "Advertencia", JOptionPane.WARNING_MESSAGE);
@@ -700,11 +699,12 @@ public class VistaGeneral extends JFrame{
 
         // Limpiar cmbListaPacientes
         cmbListaPacientes.removeAllItems();
-
+        pacientesListModel.clear();
         // actualizar cmbListaPacientes
-        for (Pacientes paciente : listaPacientes) {
-            cmbListaPacientes.addItem(paciente.getNombre() + " " + paciente.getApellidoP() + " " + paciente.getApellidoM()
-                    + ": " + paciente.getId());
+        for (Pacientes p : listaPacientes) {
+            cmbListaPacientes.addItem(p.getNombre() + " " + p.getApellidoP() + " " + p.getApellidoM()
+                    + ": " + p.getId());
+            pacientesListModel.addElement(p.getId() + ": " + p.getNombre() + " " + p.getApellidoP() + " " + p.getApellidoM());
         }
     }
 
@@ -714,11 +714,12 @@ public class VistaGeneral extends JFrame{
 
         // Limpiar cmbListaDoctores
         cmbListaDoctores.removeAllItems();
-
+        doctoresListModel.clear();
         // actualizar cmbListaDoctores
         for (Doctor d : listaDoctor) {
             cmbListaDoctores.addItem(d.getNombre() + " " + d.getApellidoP() + " " + d.getApellidoM()
                     + ": " + d.getId());
+            doctoresListModel.addElement(d.getId() + ": " + d.getNombre() + " " + d.getApellidoP() + " " + d.getApellidoM());
         }
     }
 
@@ -735,27 +736,8 @@ public class VistaGeneral extends JFrame{
 
     }
     // ciclar pacientes en lista
-    private void cargarPacientes() {
-        CrudPacientes crud = new CrudPacientes();
-        ArrayList<Pacientes> pacientes = crud.leerArchivo();
 
-        pacientesListModel.clear();
-
-        for (Pacientes p : pacientes) {
-            pacientesListModel.addElement(p.getId() + ": " + p.getNombre() + " " + p.getApellidoP() + " " + p.getApellidoM());
-        }
-    }
-    private void cargarDoctores() {
-        CrudDoctores crud = new CrudDoctores();
-        ArrayList<Doctor> doctores = crud.leerArchivo();
-
-        doctoresListModel.clear();
-
-        for (Doctor d : doctores) {
-            doctoresListModel.addElement(d.getId() + ": " + d.getNombre() + " " + d.getApellidoP() + " " + d.getApellidoM());
-        }
-    }
-    private void cargarCitas() {
+    private void actualizarListaCitas() {
         CrudCitas crud = new CrudCitas();
         ArrayList<Cita> citas = crud.leerArchivo();
 

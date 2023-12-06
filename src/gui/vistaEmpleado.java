@@ -38,10 +38,16 @@ public class vistaEmpleado extends JFrame{
         btnCerrarSesion.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                dispose();
-                JOptionPane.showMessageDialog(miPanel, "Sesion cerrada");
-                String[] tipoUsuario = {"admin"};
-                login.main(tipoUsuario);
+
+                int respuesta = JOptionPane.showConfirmDialog(miPanel, "\n¿Desea cerrar sesion?" ,"Cerrar sesion",JOptionPane.YES_NO_OPTION);
+                if(respuesta == 0) {
+                    dispose();
+                    JOptionPane.showMessageDialog(miPanel, "Sesion cerrada");
+                    String[] tipoUsuario = {"admin"};
+                    login.main(tipoUsuario);
+                }else {
+                    System.out.println("cancelando");
+                }
             }
         });
     }
