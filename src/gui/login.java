@@ -11,7 +11,6 @@ public class login extends JFrame{
     private JLabel lblUsuario;
     private JLabel lblContraseña;
     private JButton btnLogin;
-    private JButton btnCancelar;
 
     public login() {
         btnLogin.addActionListener(new ActionListener() {
